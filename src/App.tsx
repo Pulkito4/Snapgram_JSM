@@ -17,6 +17,7 @@ const App = () => {
 				</Route>
 
 				{/* Private Routes */}
+				{/* Accessible only after authentication */}
 				<Route element={<RootLayout />}>
 					<Route index element={<Home />} />
 				</Route>
