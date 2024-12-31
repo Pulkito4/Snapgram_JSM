@@ -1,11 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { useUserContext } from "@/context/AuthContext";
+
 import {
 	Form,
 	FormControl,
-	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
@@ -14,11 +16,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { SignupValidation } from "@/lib/validation";
 import Loader from "@/components/shared/Loader";
-import { Link } from "react-router-dom";
-import { createUserAccount } from "@/lib/appwrite/api";
+import { Link, useNavigate } from "react-router-dom";
+import {
+	useCreateUserAccountMutation,
+	useSignInAccountMutation,
+} from "@/lib/react-query/queriesAndMutations";
 
 const SignupForm = () => {
-	const isLoading = false;
+	const { toast } = useToast();
+	const navigate = useNavigate();
+	const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
+	
+	// renaming the mutation function to createUserAccount
+	const { mutateAsync: createUserAccount, isPending: isCreatingUser } =
+		useCreateUserAccountMutation();
+	const { mutateAsync: signInAccount, isPending: isSigningIn } =
+		useSignInAccountMutation();
 
 	// 1. Define your form.
 	const form = useForm<z.infer<typeof SignupValidation>>({
@@ -35,10 +48,37 @@ const SignupForm = () => {
 	async function onSubmit(values: z.infer<typeof SignupValidation>) {
 		// Do something with the form values.
 		// ✅ This will be type-safe and validated.
-		
-    //create a new user
-    const newuser = await createUserAccount(values);
 
+		//create a new user
+		const newUser = await createUserAccount(values);
+		console.log(newUser);
+		if (!newUser) {
+			return toast({
+				title: "Sign up failed! Please try again",
+			});
+		}
+
+		const session = await signInAccount({
+			email: values.email,
+			password: values.password,
+		});
+
+		if (!session) {
+			return toast({
+				title: "Sign in failed! Please try again",
+			});
+		}
+
+		const isLoggedIn = await checkAuthUser();
+
+		if (isLoggedIn) {
+			form.reset();
+			navigate("/");
+		} else {
+			return toast({
+				title: "Sign up failed! Please try again",
+			});
+		}
 	}
 
 	return (
@@ -123,7 +163,7 @@ const SignupForm = () => {
 						)}
 					/>
 					<Button type="submit" className="shad-button_primary">
-						{isLoading ? (
+						{isCreatingUser ? (
 							// flex-center is a custom css class in globals.css
 							<div className=" flex-center gap-2">
 								<Loader />
