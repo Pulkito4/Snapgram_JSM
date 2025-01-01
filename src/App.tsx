@@ -20,6 +20,8 @@ const App = () => {
 				{/* Private Routes */}
 				{/* Accessible only after authentication */}
 				<Route element={<RootLayout />}>
+					{/* following are the child routes/ nested routes */}
+					{/* Following routes will be rendered inside the <Outlet/> in Rootlayout component  */}
 					<Route index element={<Home />} />
 					<Route path="/explore" element={<Explore />} />
 					<Route path="/saved" element={<Saved />} />

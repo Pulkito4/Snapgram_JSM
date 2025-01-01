@@ -1,6 +1,6 @@
-import { INewUser } from "../../types";
-import { ID, Query } from "appwrite";
-import { account, appwriteConfig, avatars, databases } from "./config";
+import { ID, ImageGravity, Query } from "appwrite";
+import { account, appwriteConfig, avatars, databases, storage } from "./config";
+import { INewPost, INewUser } from "@/types";
 
 export async function createUserAccount(user: INewUser) {
     try {
@@ -93,6 +93,86 @@ export async function signOutAccount() {
     try {
         const session = await account.deleteSession('current');
         return session;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function createPost(post: INewPost) {
+    try {
+
+        //Upload image to appwrite storage
+        const uploadedFile = await uploadFile(post.file[0]);
+
+        if (!uploadedFile) throw Error;
+        const fileUrl = getFilePreviewUrl(uploadedFile.$id);
+
+        if (!fileUrl) {
+            // delete the file beacuse it was not uploaded successfully // if something becomes corrupted , delete the previous file
+            deleteFile(uploadedFile.$id);
+            throw Error;
+        };
+
+        // Convert Tags into an array 
+        const tags = post.tags?.replace(/\s /g, '').split(',') || [];
+
+        // save the new post to database
+        const newPost = await databases.createDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            ID.unique(),
+            {
+                creator: post.userId,
+                caption: post.caption,
+                imageUrl: fileUrl,
+                imageId: uploadedFile.$id,
+                location: post.location,
+                tags: tags,
+            });
+
+        if (!newPost) {
+            // if the post was not saved successfully, delete the file
+            deleteFile(uploadedFile.$id);
+            throw Error;
+        };
+
+        return newPost;
+
+    } catch (error) {
+        console.log(error);
+    }
+
+}
+
+// Uploads a file to appwrite storage
+export async function uploadFile(file: File) {
+    try {
+        const uploadedFile = await storage.createFile(appwriteConfig.storageId, ID.unique(), file);
+        return uploadedFile;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export function getFilePreviewUrl(fileId: string) {
+    try {
+
+        const fileUrl = storage.getFilePreview(appwriteConfig.storageId,
+            fileId,
+            2000,  // width
+            2000,  // height
+            ImageGravity.Top,  // gravity  
+            100);  // quality  // 100 means max quality
+        return fileUrl;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function deleteFile(fileId: string) {
+    try {
+        await storage.deleteFile(appwriteConfig.storageId, fileId);
+        return { status: "ok" };
     } catch (error) {
         console.log(error);
     }

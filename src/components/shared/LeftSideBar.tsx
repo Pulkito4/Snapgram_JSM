@@ -55,7 +55,7 @@ const LeftSideBar = () => {
 						return (
 							<li
 								key={link.label}
-								className={`leftsidebar-link group rounded-lg ${
+								className={`leftsidebar-link group ${
 									isActive && "bg-primary-500"
 								}`}>
 								<NavLink
