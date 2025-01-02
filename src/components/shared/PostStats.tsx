@@ -6,7 +6,6 @@ import {
 } from "@/lib/react-query/queriesAndMutations";
 import { checkIsLiked } from "@/lib/utils";
 import { Models } from "appwrite";
-import { set } from "date-fns";
 import { useEffect, useState } from "react";
 import Loader from "./Loader";
 
