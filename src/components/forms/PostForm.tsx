@@ -20,15 +20,22 @@ import { Models } from "appwrite";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { useCreatePostMutation } from "@/lib/react-query/queriesAndMutations";
+import {
+	useCreatePostMutation,
+	useUpdatePostMutation,
+} from "@/lib/react-query/queriesAndMutations";
 
 type PostFormProps = {
 	post?: Models.Document;
+	action: "create" | "update";
 };
 
-const PostForm = ({ post }: PostFormProps) => {
+const PostForm = ({ post, action }: PostFormProps) => {
 	const { mutateAsync: createPost, isPending: isLoadingCreate } =
 		useCreatePostMutation();
+	const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
+		useUpdatePostMutation();
+
 	const { user } = useUserContext();
 	const { toast } = useToast();
 	const navigate = useNavigate();
@@ -48,6 +55,25 @@ const PostForm = ({ post }: PostFormProps) => {
 	async function onSubmit(values: z.infer<typeof PostValidation>) {
 		// Do something with the form values.
 		// ✅ This will be type-safe and validated.
+
+		// update the post
+		if (post && action === "update") {
+			const updatedPost = await updatePost({
+				...values,
+				postId: post.$id,
+				imageId: post?.imageId,
+				imageUrl: post?.imageUrl,
+			});
+
+			if (!updatedPost) {
+				toast({
+					title: "Please try again",
+				});
+			}
+			return navigate(`/posts/${post.$id}`);
+		}
+
+		// create a new post
 		const newPost = await createPost({
 			...values,
 			userId: user.id,
@@ -149,8 +175,10 @@ const PostForm = ({ post }: PostFormProps) => {
 					</Button>
 					<Button
 						type="submit"
-						className="shad-button_primary whitespace-nowrap rounded">
-						Submit
+						className="shad-button_primary whitespace-nowrap rounded"
+						disabled={isLoadingCreate || isLoadingUpdate}>
+						{isLoadingCreate || isLoadingUpdate && 'Loading...'}
+						{action.toUpperCase()} POST
 					</Button>
 				</div>
 			</form>
