@@ -144,7 +144,6 @@ export async function createPost(post: INewPost) {
 
 }
 
-// Uploads a file to appwrite storage
 export async function uploadFile(file: File) {
     try {
         const uploadedFile = await storage.createFile(appwriteConfig.storageId, ID.unique(), file);
@@ -288,6 +287,9 @@ export async function updatePost(post: IUpdatePost) {
                 throw Error;
             };
 
+             // Delete the old image from storage
+             await deleteFile(post.imageId);
+
             image = { ...image, imageUrl: fileUrl, imageId: uploadedFile.$id };
         }
 
@@ -310,7 +312,9 @@ export async function updatePost(post: IUpdatePost) {
 
         if (!updatedPost) {
             // if the post was not saved successfully, delete the file
-            await deleteFile(post.imageId);
+            if (hasFileToUpdate) {
+                await deleteFile(image.imageId);
+            }
             throw Error;
         };
 
