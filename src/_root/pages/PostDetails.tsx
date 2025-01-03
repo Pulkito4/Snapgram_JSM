@@ -2,17 +2,44 @@ import Loader from "@/components/shared/Loader";
 import PostStats from "@/components/shared/PostStats";
 import { Button } from "@/components/ui/button";
 import { useUserContext } from "@/context/AuthContext";
-import { useGetPostByIdQuery } from "@/lib/react-query/queriesAndMutations";
+import {
+	useGetPostByIdQuery,
+	useDeletePostMutation,
+} from "@/lib/react-query/queriesAndMutations";
 import { getTimestamp } from "@/lib/utils";
 import { Link, useParams } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const PostDetails = () => {
 	const { id } = useParams();
 	const { data: post, isPending } = useGetPostByIdQuery(id || "");
 	const { user } = useUserContext();
+	const navigate = useNavigate();
+	const { toast } = useToast();
+	const { mutate: deletePost, isPending: isLoadingDelete } =
+		useDeletePostMutation();
 
-	const handleDeletePost = () => {};
-
+	const handleDeletePost = () => {
+		deletePost(
+			{
+				postId: post?.$id || "",
+				imageId: post?.imageId,
+			},
+			{
+				onSuccess: () => {
+					toast({ title: "Post deleted successfully" });
+					navigate(-1);
+				},
+				onError: () => {
+					toast({
+						title: "Error deleting post",
+						variant: "destructive",
+					});
+				},
+			}
+		);
+	};
 	return (
 		<div className="post_details-container">
 			{isPending ? (
@@ -78,13 +105,18 @@ const PostDetails = () => {
 									className={`ghost_details-delete_btn ${
 										user.id !== post?.creator.$id &&
 										"hidden"
-									}`}>
-									<img
-										src="/assets/icons/delete.svg"
-										alt="delete"
-										height={24}
-										width={24}
-									/>
+									}`}
+									disabled={isLoadingDelete}>
+									{isLoadingDelete ? (
+										<Loader />
+									) : (
+										<img
+											src="/assets/icons/delete.svg"
+											alt="delete"
+											width={24}
+											height={24}
+										/>
+									)}
 								</Button>
 							</div>
 						</div>

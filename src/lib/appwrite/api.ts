@@ -325,13 +325,36 @@ export async function deletePost(postId: string, imageId: string) {
     if (!postId || !imageId) throw Error;
 
     try {
+        // Delete saves records first
+        const saves = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.savesCollectionId,
+            [Query.equal('post', postId)]
+        );
+
+        // Delete all saves
+        const deletePromises = saves.documents.map((save) => 
+            databases.deleteDocument(
+                appwriteConfig.databaseId,
+                appwriteConfig.savesCollectionId,
+                save.$id
+            )
+        );
+
+        // Wait for all saves to be deleted
+        await Promise.all(deletePromises);
+
+        // Delete post image
+        await storage.deleteFile(appwriteConfig.storageId, imageId);
+
+        // Finally delete the post
         await databases.deleteDocument(
             appwriteConfig.databaseId,
             appwriteConfig.postCollectionId,
             postId
-        )
+        );
 
-        return { status: "ok" }
+        return { status: "ok" };
     } catch (error) {
         console.log(error);
     }
