@@ -51,13 +51,31 @@ export const useCreatePostMutation = () => {
     );
 }
 
+
+// PREVIOUS/ORIGINAL QUERY TO GET RECENT POSTS FOR HOME PAGE
+// export const useGetRecentPostsQuery = () => {
+//     return useQuery(
+//         {
+//             queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+//             queryFn: () => getRecentPosts(),
+//         }
+//     );
+// }
+
+// NEW QUERY TO GET RECENT POSTS FOR HOME PAGE WITH PAGINATION/INFINITE SCROLL
 export const useGetRecentPostsQuery = () => {
-    return useQuery(
-        {
-            queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
-            queryFn: () => getRecentPosts(),
-        }
-    );
+    return useInfiniteQuery({
+        queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+        queryFn: getRecentPosts,
+        getNextPageParam: (lastPage) => {
+            if (!lastPage || lastPage.documents.length === 0) {
+                return null;
+            }
+            
+            const lastId = lastPage.documents[lastPage.documents.length - 1].$id;
+            return lastId;
+        },
+    });
 }
 
 export const useLikePostQuery = () => {

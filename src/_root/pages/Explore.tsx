@@ -84,6 +84,7 @@ const Explore = () => {
 					/>
 				) : shouldShowPosts ? (
 					<p className=" text-light-4 mt-10 w-full text-center">
+						{/* This end of posts will be shown if there do not exist any (not even a single) post to show */}
 						End of Posts
 					</p>
 				) : (

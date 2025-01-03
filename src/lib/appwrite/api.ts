@@ -177,12 +177,42 @@ export async function deleteFile(fileId: string) {
     }
 }
 
-export async function getRecentPosts() {
+// PREVIOUS/ ORIGINAL FUCNTION TO GET RECENT MOST POSTS ON HOME PAGE
+// export async function getRecentPosts() {
+//     try {
+//         const posts = await databases.listDocuments(
+//             appwriteConfig.databaseId,
+//             appwriteConfig.postCollectionId,
+//             [Query.orderDesc("$createdAt"), Query.limit(20)]
+//         );
+
+//         if (!posts) throw Error;
+
+//         return posts;
+
+//     } catch (error) {
+//         console.log(error);
+//         throw Error;
+
+//     }
+// }
+
+// UPDATED FUNCTION TO GET RECENT POSTS WITH PAGINATION/ INFINITE SCROLL
+
+export async function getRecentPosts({ pageParam }: { pageParam: number }) {
     try {
+        const queries: any[] = [
+            Query.orderDesc("$createdAt"),
+            Query.limit(15)
+        ];
+        if (pageParam) {
+            queries.push(Query.cursorAfter(pageParam.toString()));
+        }
+        
         const posts = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.postCollectionId,
-            [Query.orderDesc("$createdAt"), Query.limit(20)]
+            queries
         );
 
         if (!posts) throw Error;
@@ -191,8 +221,6 @@ export async function getRecentPosts() {
 
     } catch (error) {
         console.log(error);
-        throw Error;
-
     }
 }
 
