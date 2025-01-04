@@ -66,6 +66,8 @@ const Explore = () => {
 
 			<div className="flex-between w-full max-w-5xl mt-16 pb-7">
 				<h3 className="body-bold md:h3-bold">Popular Today</h3>
+
+				{/* Filter Functionality | Not implemented right now */}
 				<div className="flex-center gap-3 bg-dark-3 rounded-xl py-2 px-4 cursor-pointer">
 					<p className="small-medium md:base-medium">All</p>
 					<img

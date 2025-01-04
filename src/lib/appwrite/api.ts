@@ -482,3 +482,18 @@ export async function getTopCreators() {
         return { documents: [] }; // Return empty array on error
     }
 }
+
+export async function getUserById(userId: string) {
+    try {
+        const user = await databases.getDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.userCollectionId,
+            userId
+        )
+
+        return user;
+
+    } catch (error) {
+        console.log(error);
+    }
+}
