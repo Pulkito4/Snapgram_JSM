@@ -208,7 +208,7 @@ export async function getRecentPosts({ pageParam }: { pageParam: number }) {
         if (pageParam) {
             queries.push(Query.cursorAfter(pageParam.toString()));
         }
-        
+
         const posts = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.postCollectionId,
@@ -315,8 +315,8 @@ export async function updatePost(post: IUpdatePost) {
                 throw Error;
             };
 
-             // Delete the old image from storage
-             await deleteFile(post.imageId);
+            // Delete the old image from storage
+            await deleteFile(post.imageId);
 
             image = { ...image, imageUrl: fileUrl, imageId: uploadedFile.$id };
         }
@@ -365,7 +365,7 @@ export async function deletePost(postId: string, imageId: string) {
         );
 
         // Delete all saves
-        const deletePromises = saves.documents.map((save) => 
+        const deletePromises = saves.documents.map((save) =>
             databases.deleteDocument(
                 appwriteConfig.databaseId,
                 appwriteConfig.savesCollectionId,
@@ -431,6 +431,21 @@ export async function searchPosts(searchTerm: string) {
         if (!posts) throw Error;
 
         return posts;
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getUsers() {
+    try {
+        const users = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.userCollectionId,
+        )
+
+        if (!users) throw Error;
+        return users;
 
     } catch (error) {
         console.log(error);

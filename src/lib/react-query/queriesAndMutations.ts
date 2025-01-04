@@ -4,7 +4,7 @@ import {
     useQueryClient,
     useInfiniteQuery,
 } from '@tanstack/react-query';
-import { createPost, createUserAccount, deletePost, deleteSavedPost, getCurrentUser, getInfinitePosts, getPostById, getRecentPosts, likePost, savePost, searchPosts, signInAccount, signOutAccount, updatePost } from '../appwrite/api';
+import { createPost, createUserAccount, deletePost, deleteSavedPost, getCurrentUser, getInfinitePosts, getPostById, getRecentPosts, getUsers, likePost, savePost, searchPosts, signInAccount, signOutAccount, updatePost } from '../appwrite/api';
 import { INewPost, INewUser, IUpdatePost } from '@/types';
 import { QUERY_KEYS } from './queryKeys';
 
@@ -71,7 +71,7 @@ export const useGetRecentPostsQuery = () => {
             if (!lastPage || lastPage.documents.length === 0) {
                 return null;
             }
-            
+
             const lastId = lastPage.documents[lastPage.documents.length - 1].$id;
             return lastId;
         },
@@ -212,5 +212,12 @@ export const useSearchPostsQuery = (searchTerm: string) => {
         queryKey: [QUERY_KEYS.SEARCH_POSTS, searchTerm],
         queryFn: () => searchPosts(searchTerm),
         enabled: !!searchTerm,  // refetch the data when search term is not empty and whenever it changes 
+    });
+}
+
+export const useGetUsersQuery = () => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_USERS],
+        queryFn: () => getUsers(),
     });
 }

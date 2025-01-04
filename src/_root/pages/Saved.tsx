@@ -4,9 +4,9 @@ import { useGetCurrentUserQuery } from "@/lib/react-query/queriesAndMutations";
 import { Models } from "appwrite";
 
 const Saved = () => {
+
+  // See the explanation for this part of code from notes made on notion
 	const { data: currentUser } = useGetCurrentUserQuery();
-  console.log(currentUser);
-  console.log(currentUser?.save);
 	const savedPosts = currentUser?.save.map((savedPost: Models.Document) => ({
 		...savedPost.post,
 		creator: {
