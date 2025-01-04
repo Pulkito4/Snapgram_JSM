@@ -1,5 +1,6 @@
 import Loader from "@/components/shared/Loader";
 import PostCard from "@/components/shared/PostCard";
+import RightSidebar from "@/components/shared/RightSidebar";
 import { useGetRecentPostsQuery } from "@/lib/react-query/queriesAndMutations";
 import { Models } from "appwrite";
 import { useEffect } from "react";
@@ -28,40 +29,48 @@ const Home = () => {
 	}, [inView, hasNextPage]);
 
 	return (
-		<div className="flex flex-1">
-			<div className="home-container">
-				<div className="home-posts">
-					<h2 className="h3-bold md:h2-bold text-left w-full">
-						Home Feed
-					</h2>
-					{isPostLoading && !posts ? (
-						<Loader />
-					) : (
-						// original code to get recent posts
-						// <ul className=" flex flex-col flex-1 gap-9 w-full">
-						// 	{posts?.documents.map((post: Models.Document) => (
-						// 		<PostCard key={post.$id}  post={post} />
-						// 	))}
-						// </ul>
+		<>
+			<div className="flex flex-1">
+				<div className="home-container">
+					<div className="home-posts">
+						<h2 className="h3-bold md:h2-bold text-left w-full">
+							Home Feed
+						</h2>
+						{isPostLoading && !posts ? (
+							<Loader />
+						) : (
+							// original code to get recent posts
+							// <ul className=" flex flex-col flex-1 gap-9 w-full">
+							// 	{posts?.documents.map((post: Models.Document) => (
+							// 		<PostCard key={post.$id}  post={post} />
+							// 	))}
+							// </ul>
 
-						// new code to get infinite posts/pagination
-						<ul className="flex flex-col flex-1 gap-9 w-full">
-							{posts?.pages.map((page) =>
-								page?.documents.map((post: Models.Document) => (
-									<PostCard key={post.$id} post={post} />
-								))
-							)}
-						</ul>
+							// new code to get infinite posts/pagination
+							<ul className="flex flex-col flex-1 gap-9 w-full">
+								{posts?.pages.map((page) =>
+									page?.documents.map(
+										(post: Models.Document) => (
+											<PostCard
+												key={post.$id}
+												post={post}
+											/>
+										)
+									)
+								)}
+							</ul>
+						)}
+					</div>
+					{/* Adding this to implement infinite scroll functionality on the home page too */}
+					{hasNextPage && (
+						<div ref={ref} className="mt-10">
+							<Loader />
+						</div>
 					)}
 				</div>
-				{/* Adding this to implement infinite scroll functionality on the home page too */}
-				{hasNextPage && (
-					<div ref={ref} className="mt-10">
-						<Loader />
-					</div>
-				)}
 			</div>
-		</div>
+			<RightSidebar />
+		</>
 	);
 };
 

@@ -451,3 +451,34 @@ export async function getUsers() {
         console.log(error);
     }
 }
+
+export async function getTopCreators() {
+    try {
+        // Step 1: Fetch all users
+        const usersResponse = await getUsers();
+        const users = usersResponse?.documents;
+
+        if (!users || users.length === 0) {
+            return { documents: [] }; // No users found
+        }
+
+        // Step 2: Sort users by the length of their 'posts' array (descending order)
+        const sortedUsers = users
+            .map((user) => ({
+                ...user,
+                postCount: user.posts ? user.posts.length : 0, // Calculate post count
+            }))
+            .sort((a, b) => b.postCount - a.postCount);
+
+        // Step 3: Get the top 5 users
+        const topUsers = sortedUsers.slice(0, 5);
+
+        return { documents: topUsers };
+
+
+        
+    } catch (error) {
+        console.log(error);
+        return { documents: [] }; // Return empty array on error
+    }
+}
