@@ -2,6 +2,7 @@ import Loader from "@/components/shared/Loader";
 import UserCard from "@/components/shared/UserCard";
 import { useToast } from "@/hooks/use-toast";
 import { useGetUsersQuery } from "@/lib/react-query/queriesAndMutations";
+import { useEffect } from "react";
 
 const AllUsers = () => {
 	const { toast } = useToast();
@@ -12,9 +13,14 @@ const AllUsers = () => {
 		isError: usersError,
 	} = useGetUsersQuery();
 
-	if (usersError) {
-		return toast({ title: "Sometthing went wrong while fetching users" });
-	}
+	useEffect(() => {
+        if (usersError) {
+            toast({
+                title: "Something went wrong while fetching users",
+                variant: "destructive",
+            });
+        }
+    }, [usersError, toast]);
 
 	return (
 		<div className="common-container">

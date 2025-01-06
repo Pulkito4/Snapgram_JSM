@@ -25,12 +25,12 @@ import {
 const SignupForm = () => {
 	const { toast } = useToast();
 	const navigate = useNavigate();
-	const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
+	const { checkAuthUser } = useUserContext();
 	
 	// renaming the mutation function to createUserAccount
 	const { mutateAsync: createUserAccount, isPending: isCreatingUser } =
 		useCreateUserAccountMutation();
-	const { mutateAsync: signInAccount, isPending: isSigningIn } =
+	const { mutateAsync: signInAccount } =
 		useSignInAccountMutation();
 
 	// 1. Define your form.
