@@ -194,25 +194,45 @@ export const useDeletePostMutation = () => {
 }
 
 export const useGetPostsQuery = () => {
-
-    // This is the query that will be used to get the posts for the infinite scroll
-    // This is an inbuilt React Query hook that will be used to get the infinite posts
     return useInfiniteQuery({
         queryKey: [QUERY_KEYS.GET_INFINITE_POSTS],
-        queryFn: getInfinitePosts,
-        initialPageParam: 0,
-
-        // This is the function that tells React Query how to get the next page of data 
-        getNextPageParam: (lastPage) => {
-            if (lastPage && lastPage.documents.length === 0) {
+        queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
+            const response = await getInfinitePosts({ pageParam });
+            if (!response) {
+                return { documents: [] };
+            }
+            return response;
+        },
+        initialPageParam: undefined as string | undefined,
+        getNextPageParam: (lastPage: { documents: Array<{ $id: string }> }) => {
+            if (!lastPage || lastPage.documents.length === 0) {
                 return null;
             }
-
-            // Using the array index as the next page parameter
-            return lastPage?.documents.length;
+            return lastPage.documents[lastPage.documents.length - 1].$id;
         },
     });
 }
+
+// export const useGetPostsQuery = () => {
+
+//     // This is the query that will be used to get the posts for the infinite scroll
+//     // This is an inbuilt React Query hook that will be used to get the infinite posts
+//     return useInfiniteQuery({
+//         queryKey: [QUERY_KEYS.GET_INFINITE_POSTS],
+//         queryFn: getInfinitePosts,
+//         initialPageParam: 0,
+
+//         // This is the function that tells React Query how to get the next page of data 
+//         getNextPageParam: (lastPage) => {
+//             if (lastPage && lastPage.documents.length === 0) {
+//                 return null;
+//             }
+
+//             // Using the array index as the next page parameter
+//             return lastPage?.documents.length;
+//         },
+//     });
+// }
 
 export const useSearchPostsQuery = (searchTerm: string) => {
     return useQuery({
