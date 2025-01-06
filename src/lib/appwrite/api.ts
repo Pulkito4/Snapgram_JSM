@@ -199,7 +199,7 @@ export async function deleteFile(fileId: string) {
 
 // UPDATED FUNCTION TO GET RECENT POSTS WITH PAGINATION/ INFINITE SCROLL
 
-export async function getRecentPosts({ pageParam }: { pageParam: number }) {
+export async function getRecentPosts({ pageParam }: { pageParam?: string }) {
     try {
         const queries: any[] = [
             Query.orderDesc("$createdAt"),

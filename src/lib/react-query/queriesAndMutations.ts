@@ -66,14 +66,20 @@ export const useCreatePostMutation = () => {
 export const useGetRecentPostsQuery = () => {
     return useInfiniteQuery({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
-        queryFn: getRecentPosts,
-        getNextPageParam: (lastPage) => {
+        queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
+            const response = await getRecentPosts({ pageParam });
+            if (!response) {
+                return { documents: [] };
+            }
+            return response;
+        },
+        initialPageParam: undefined as string | undefined,
+        getNextPageParam: (lastPage: { documents: Array<{ $id: string }> }) => {
             if (!lastPage || lastPage.documents.length === 0) {
                 return null;
             }
 
-            const lastId = lastPage.documents[lastPage.documents.length - 1].$id;
-            return lastId;
+            return lastPage.documents[lastPage.documents.length - 1].$id;
         },
     });
 }
@@ -194,6 +200,7 @@ export const useGetPostsQuery = () => {
     return useInfiniteQuery({
         queryKey: [QUERY_KEYS.GET_INFINITE_POSTS],
         queryFn: getInfinitePosts,
+        initialPageParam: 0,
 
         // This is the function that tells React Query how to get the next page of data 
         getNextPageParam: (lastPage) => {
@@ -201,8 +208,8 @@ export const useGetPostsQuery = () => {
                 return null;
             }
 
-            const lastId = lastPage?.documents[lastPage.documents.length - 1].$id
-            return lastId;
+            // Using the array index as the next page parameter
+            return lastPage?.documents.length;
         },
     });
 }
